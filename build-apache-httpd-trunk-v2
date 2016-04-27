@@ -6,7 +6,8 @@ stage "Build Configuration"
 sh "./buildconf"
 
 stage "Configure"
-sh "./configure --prefix=/apache-trunk --with-included-apr"
+sh "./configure --prefix=" + pwd() + "/apache-trunk --with-included-apr"
+
 
 stage "Make"
 sh "make"
