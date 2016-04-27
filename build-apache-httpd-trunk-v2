@@ -4,10 +4,7 @@ svn 'http://svn.apache.org/repos/asf/apr/apr/trunk'
 
 stage "Build Configuration"
 sh "./buildconf"
-
-stage "Configure"
 sh "./configure --prefix=" + pwd() + "/apache-trunk --with-included-apr"
-
 
 stage "Make"
 sh "make"
