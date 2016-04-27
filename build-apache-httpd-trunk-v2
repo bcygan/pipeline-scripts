@@ -1,0 +1,12 @@
+stage "Fetch Sources"
+svn 'http://svn.apache.org/repos/asf/httpd/httpd/trunk'
+svn 'http://svn.apache.org/repos/asf/apr/apr/trunk'
+
+stage "Build Configuration"
+sh "./buildconf"
+
+stage "Configure"
+sh "./configure --prefix=/apache-trunk --with-included-apr"
+
+stage "Make"
+sh "make"
