@@ -1,10 +1,13 @@
-stage "Fetch Sources"
-svn 'http://svn.apache.org/repos/asf/httpd/httpd/trunk'
-svn 'http://svn.apache.org/repos/asf/apr/apr/trunk'
+node('apache') {
+  stage "Fetch Sources"
+  svn 'http://svn.apache.org/repos/asf/httpd/httpd/trunk'
+  svn 'http://svn.apache.org/repos/asf/apr/apr/trunk'
 
-stage "Build Configuration"
-sh "./buildconf"
-sh "./configure --prefix=" + pwd() + "/apache-trunk --with-included-apr"
+  stage "Build Configuration"
+  sh "./buildconf"
+  sh "mkdir -p" + pwd() + "/apache-trunk"
+  sh "./configure --prefix=" + pwd() + "/apache-trunk --with-included-apr"
 
-stage "Make"
-sh "make"
+  stage "Make"
+  sh "make"
+}
