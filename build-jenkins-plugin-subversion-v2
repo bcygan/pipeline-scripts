@@ -40,7 +40,7 @@ parallel "Integration Tests": {
         runMaven("sonar:sonar")
         echo "Quality Metrics: finished"
     }
-}
+},
 "Sonatype": {
     node {
         echo "++++++++++ Sonatype ++++++++++"
