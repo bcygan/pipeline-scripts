@@ -45,8 +45,10 @@ parallel "Integration Tests": {
     node {
         echo "++++++++++ Sonatype ++++++++++"
             
-        unstash stashName+"-sources"  // we need to get the source again just in case we are running on a different node
-        //runMaven("sonar:sonar")
+        // TODO 
+        // unstash either binary or -sources
+        // let Sonatype scan, fetch the result
+        // show that scan result can be embedded in Jenkins as well as in Sonar
         echo "Sonatype: finished"
     }
 }
