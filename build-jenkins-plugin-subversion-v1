@@ -41,7 +41,11 @@ parallel "Integration Tests": {
         echo "Quality Metrics: finished"
     }
 }
-//checkpoint "integration tests and quality metrics are done"
+try {
+    checkpoint "integration tests and quality metrics are done"
+} except (NoSuchMethodError e) {
+    echo "checkpoints are a CJP feature"
+}
 
 // check that the clients still can work with the host
 // here we limit concurrency to 2 because we just have 2 slave nodes
