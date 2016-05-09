@@ -20,7 +20,11 @@ node {
     sh "tar -czvf target/${stashName}.tgz --files-from ./target/plugins.list"
     stash name: stashName, includes: "target/${stashName}.tgz" 
 }
-//checkpoint "plugin binary is built"
+try {
+    checkpoint "binary is built"
+} catch (NoSuchMethodError e) {
+    echo "checkpoints are a CJP feature"
+}
 
 stage name:"Integration Tests and Quality Metrics" , concurrency: 1 // cheap way to ensure that double-click does not result in two builds
 parallel "Integration Tests": {
