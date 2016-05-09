@@ -85,7 +85,7 @@ parallel "Load Test #1" : {
 
 stage name:"Deploy to Production"
 node {
-    //input &quot;All tests are ok. Shall we continue to deploy into production (This will initiate a Jenkins restart) ?&quot;
+    //input "All tests are ok. Shall we continue to deploy into production (This will initiate a Jenkins restart) ?"
     uploadPluginAndRestartJenkins ( jenkinsProductionHost, "plugin" )
 }
 
