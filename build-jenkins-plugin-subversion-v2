@@ -22,7 +22,7 @@ node {
 }
 //checkpoint "plugin binary is built"
 
-stage name:"Integration Tests and Quality Metrics" , concurrency: 1 // cheap way to ensure that double-click does not result in two builds
+stage name:"Tests and Metrics" , concurrency: 1 // cheap way to ensure that double-click does not result in two builds
 parallel "Integration Tests": {
     node {
         echo "++++++++++ Integration Tests ++++++++++"
@@ -32,13 +32,13 @@ parallel "Integration Tests": {
         echo "Integration Tests: finished"
     }
 },
-"Quality Metrics": {
+"Sonar": {
     node {
         echo "++++++++++ Quality Metrics ++++++++++"
             
         unstash stashName+"-sources"  // we need to get the source again just in case we are running on a different node
         runMaven("sonar:sonar")
-        echo "Quality Metrics: finished"
+        echo "Sonar: finished"
     }
 },
 "Sonatype": {
@@ -52,7 +52,7 @@ parallel "Integration Tests": {
         echo "Sonatype: finished"
     }
 }
-//checkpoint "integration tests and quality metrics are done"
+checkpoint "tests and metrics are done"
 
 // check that the clients still can work with the host
 // here we limit concurrency to 2 because we just have 2 slave nodes
