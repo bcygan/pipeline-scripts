@@ -1,0 +1,93 @@
+def String sourceURL = "https://github.com/jenkinsci/subversion-plugin"
+
+def String jenkinsTestHost = "localhost:8080/"
+def String jenkinsProductionHost = "localhost:8081/"
+def String stashName = "plugin"
+
+stage name:"Build"; //, concurrency: 1 // cheap way to ensure that double-click does not result in two builds
+node {
+    echo "++++++++++ Build - getting source code from ${sourceURL}"
+    
+    git url:sourceURL
+    stash name: stashName+"-sources", excludes: "target/*" 
+    
+    echo "++++++++++ Build - running maven +++++"
+    runMaven("-DskipTests=true clean install") // we will come back to the tests later on 
+    
+    echo "++++++++++ Build - stashing plugin file +++++"
+    // recursively stash all .hpi files under target/, namely archiving /*/target/*.hpi
+    sh "find . -path '*/target/*.hpi' |grep -v 'test-classes' >target/plugins.list"
+    sh "tar -czvf target/${stashName}.tgz --files-from ./target/plugins.list"
+    stash name: stashName, includes: "target/${stashName}.tgz" 
+}
+//checkpoint "plugin binary is built"
+
+stage name:"Integration Tests and Quality Metrics" , concurrency: 1 // cheap way to ensure that double-click does not result in two builds
+parallel "Integration Tests": {
+    node {
+        echo "++++++++++ Integration Tests ++++++++++"
+
+        unstash stashName+"-sources" // we need to get the source again just in case we are running on a different node
+        //runMaven("verify")
+        echo "Integration Tests: finished"
+    }
+},
+"Quality Metrics": {
+    node {
+        echo "++++++++++ Quality Metrics ++++++++++"
+            
+        unstash stashName+"-sources"  // we need to get the source again just in case we are running on a different node
+        runMaven("sonar:sonar")
+        echo "Quality Metrics: finished"
+    }
+}
+//checkpoint "integration tests and quality metrics are done"
+
+// check that the clients still can work with the host
+// here we limit concurrency to 2 because we just have 2 slave nodes
+stage name: "Load Tests", concurrency: 2 
+parallel "Load Test #1" : {
+    node {
+        executeLoadTest(jenkinsTestHost)
+    }
+},
+"Load Test #2": {
+    node {
+        executeLoadTest(jenkinsTestHost)
+    }
+},
+"Load Test #3": {
+    node {
+        executeLoadTest(jenkinsTestHost)
+    }
+}
+//checkpoint "all tests are done"    
+
+stage name:"Deploy to Production"
+node {
+    //input &quot;All tests are ok. Shall we continue to deploy into production (This will initiate a Jenkins restart) ?&quot;
+    uploadPluginAndRestartJenkins ( jenkinsProductionHost, "plugin" )
+}
+
+def executeLoadTest ( String jenkinsHost ) {
+    echo "++++++++++ executing load test against Jenkins host ${jenkinsHost} ++++++++++"
+    
+    // do here whatever you like, e.g. Selenium, calling the REST API with curl, ...
+}
+
+def uploadPluginAndRestartJenkins ( String jenkinsHost, String stashName ) {
+    echo "++++++++++ uploading plugin to ${jenkinsHost} ++++++++++"
+    unstash stashName
+    // now we have all plugins in plugins.tgz
+    // execute whatever mechanism you have for deployment of plugins
+    // e.g. 
+    // scp *.hpi jenkins@jenkins.local:/var/lib/jenkins/plugins
+    // java -jar &lt;some-path&gt;/jenkins-cli.jar -s ${jenkinsHost} safe-restart;
+    //
+}
+
+def runMaven ( String parameters ) {
+    echo "++++++++++ executing Maven with ${parameters} ++++++++++"
+    def mvnHome = tool 'M3'
+    sh "${mvnHome}/bin/mvn -B "+parameters
+}
