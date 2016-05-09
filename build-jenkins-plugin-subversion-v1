@@ -43,7 +43,7 @@ parallel "Integration Tests": {
 }
 try {
     checkpoint "integration tests and quality metrics are done"
-} except (NoSuchMethodError e) {
+} catch (NoSuchMethodError e) {
     echo "checkpoints are a CJP feature"
 }
 
