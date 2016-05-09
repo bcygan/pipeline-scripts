@@ -1,0 +1,7 @@
+jenkinshttpdslave:
+    container_name: jenkins_httpd_slave
+    image: dharmsheta/httpd:1.0.0
+    ports:
+        - "2223:22"
+        - "8889:80"
+    restart: always
