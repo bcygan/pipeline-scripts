@@ -5,7 +5,7 @@ node('apache') {
 
   stage "Build Configuration"
   sh "./buildconf"
-  sh "mkdir -p" + pwd() + "/apache-trunk"
+  sh "mkdir -p " + pwd() + "/apache-trunk"
   sh "./configure --prefix=" + pwd() + "/apache-trunk --with-included-apr"
 
   stage "Make"
