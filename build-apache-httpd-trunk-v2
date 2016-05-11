@@ -1,13 +1,33 @@
 node('apache') {
+  // fetching sources takes about 50 seconds
   stage "Fetch Sources"
-  svn 'http://svn.apache.org/repos/asf/httpd/httpd/trunk'
-  svn 'http://svn.apache.org/repos/asf/apr/apr/trunk'
+  fetchSources()
 
+  // buildconf just takes 1 second, so we put that in the same stage as configure (which takes around 20 seconds)
   stage "Build Configuration"
+  configureBuild()
+
+  // make takes roughly 40 seconds
+  stage "Make"
+  make()
+  
+  // POST: we have a local build ready to run tests or to be included in a container setup
+}
+
+def fetchSources () {
+  svn 'http://svn.apache.org/repos/asf/httpd/httpd/trunk'
+  // option: fetch both source trees separately and use source stashes
+  svn 'http://svn.apache.org/repos/asf/apr/apr/trunk'
+  // option: use source stashes to more easily distribute the build for various configurations
+}
+
+def configureBuild () {
   sh "./buildconf"
   sh "mkdir -p " + pwd() + "/apache-trunk"
+  // use a directory specific to the build, so we don't get into trouble with parallel builds
   sh "./configure --prefix=" + pwd() + "/apache-trunk --with-included-apr"
+}
 
-  stage "Make"
+def make () {
   sh "make"
 }
