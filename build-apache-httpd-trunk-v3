@@ -1,0 +1,40 @@
+// changes from v2: using one node to fetch the sources and a different node to build. Quite useful for embedded scenarios or variant testing. 
+
+def stashName = "apache-httpd-sources"
+  
+stage "Fetch Sources"
+  node('jdk7') { // this really could be any node with a connection to the outside world
+    fetchSources()
+    stash stashName, includes: "*" 
+  }
+
+node('apache') { // this node doesn't need an outside connection
+  stage "Build Configuration"
+  unstash stashName // retrieving the stuff we fecthed earlier
+  configureBuild()
+
+  stage "Make"
+  make()
+}
+// POST: we have a local build ready to run tests or to be included in a container setup
+
+// fetching sources takes about 50 seconds
+def fetchSources () {
+  svn 'http://svn.apache.org/repos/asf/httpd/httpd/trunk'
+  // option: fetch both source trees separately and use source stashes
+  svn 'http://svn.apache.org/repos/asf/apr/apr/trunk'
+  // option: use source stashes to more easily distribute the build for various configurations
+}
+
+// buildconf just takes 1 second, so we put that in the same stage as configure (which takes around 20 seconds)
+def configureBuild () {
+  sh "./buildconf"
+  sh "mkdir -p " + pwd() + "/apache-trunk"
+  // use a directory specific to the build, so we don't get into trouble with parallel builds
+  sh "./configure --prefix=" + pwd() + "/apache-trunk --with-included-apr"
+}
+
+// make takes roughly 40 seconds
+def make () {
+  sh "make"
+}
