@@ -3,22 +3,26 @@ def String sourceURL = "https://github.com/jenkinsci/subversion-plugin"
 def String jenkinsTestHost = "localhost:8080/"
 def String jenkinsProductionHost = "localhost:8081/"
 def String stashName = "plugin"
+def String sourceStashName = stashName+"-sources"
 
 stage name:"Build"; //, concurrency: 1 // cheap way to ensure that double-click does not result in two builds
 node {
     echo "++++++++++ Build - getting source code from ${sourceURL}"
     
     git url:sourceURL
-    stash name: stashName+"-sources", excludes: "target/*" 
+    stash name: sourceStashName, excludes: "target/*" 
     
     echo "++++++++++ Build - running maven +++++"
     runMaven("-DskipTests=true clean install") // we will come back to the tests later on 
+    
+    runSonatypeCLM('Build')
     
     echo "++++++++++ Build - stashing plugin file +++++"
     // recursively stash all .hpi files under target/, namely archiving /*/target/*.hpi
     sh "find . -path '*/target/*.hpi' |grep -v 'test-classes' >target/plugins.list"
     sh "tar -czvf target/${stashName}.tgz --files-from ./target/plugins.list"
     stash name: stashName, includes: "target/${stashName}.tgz" 
+    
 }
 guardedCheckpoint "binary is built"
 
@@ -33,20 +37,7 @@ parallel "Integration Tests": {
     }
 },
 "Sonar": {
-    node {
-        echo "++++++++++ Quality Metrics ++++++++++"
-            
-        unstash stashName+"-sources"  // we need to get the source again just in case we are running on a different node
-        runMaven("sonar:sonar")
-        echo "Sonar: finished"
-    }
-},
-"Sonatype": {
-    node {
-        echo "++++++++++ Sonatype ++++++++++"
-        runSonatypeCLM()            
-        echo "Sonatype: finished"
-    }
+    runSonar(stashName+"-sources")
 }
 guardedCheckpoint "tests and metrics are done"
 
@@ -69,6 +60,11 @@ parallel "Load Test #1" : {
     }
 }
 //checkpoint "all tests are done"    
+
+stage name:"Pre-Release Tests"
+    node {
+        runSonatypeCLM('Stage Release')            
+    }
 
 stage name:"Deploy to Production"
 node {
@@ -107,12 +103,31 @@ def guardedCheckpoint ( String message ) {
     }    
 }
 
-def runSonatypeCLM () {
-        // TODO 
-        // unstash either binary or -sources
-        // let Sonatype scan, fetch the result
-        // show that scan result can be embedded in Jenkins as well as in Sonar
-        //step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: 'target/surefire-reports/*.xml'
-        //step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', applicationSelectType
+def runSonatypeCLM (String stageIdParm) {
+    echo "++++++++++ Sonatype stage ${stageIdParm} ++++++++++"
+    // TODO 
+    // unstash either binary or -sources
+    // let Sonatype scan, fetch the result
+    // show that scan result can be embedded in Jenkins as well as in Sonar
+    //step $class: 'hudson.tasks.junit.JUnitResultArchiver', testResults: 'target/surefire-reports/*.xml'
+        
+    // infos from decomposition of plugin
+    //step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', applicationSelectType
+    // ApplicationSelectType: constructor=value,manualAppId,listAppId
+
+    //constructor=username,password,applicationSelectTypePost,listAppId,manualAppId,scanTargets,moduleExcludes,scanProperties,failOnClmServerFailures,stageId
+    step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: 'jenkins', password: 'jenkins', applicationTypePost: 'listAppId', listAppId:'Jenkins', stageId:stageIdParm
+    
+    echo "Sonatype: finished"
+}
+
+def runSonar ( String sourceStashName ) {
+    node {
+        echo "++++++++++ Quality Metrics ++++++++++"
+            
+        unstash sourceStashName  // we need to get the source again just in case we are running on a different node
+        runMaven("sonar:sonar")
+        echo "Sonar: finished"
+    }
 
 }
