@@ -118,7 +118,7 @@ def runSonatypeCLM (String stageIdParm) {
     //constructor=username,password,applicationSelectTypePost,listAppId,manualAppId,scanTargets,moduleExcludes,scanProperties,failOnClmServerFailures,stageId
     //step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: 'jenkins', password: 'jenkins', applicationTypePost: 'listAppId', listAppId:'Jenkins', stageId:stageIdParm
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: '452cfc80-f164-43d9-93e7-4dd1360dca47', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME']]) {
-        step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: '${env.PASSWORD}', applicationTypePost: 'listAppId', listAppId:'Jenkins', stageId:stageIdParm
+        step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: Secret.FromString('${env.PASSWORD}'), applicationTypePost: 'listAppId', listAppId:'Jenkins', stageId:stageIdParm
     }
     
     echo "Sonatype: finished"
