@@ -120,7 +120,8 @@ def runSonatypeCLM (String stageIdParm) {
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: '452cfc80-f164-43d9-93e7-4dd1360dca47', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME']]) {
         def secret = hudson.util.Secret.fromString(env.PASSWORD);
 //        step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret, applicationTypePost: 'listAppId', listAppId:'Jenkins', stageId:stageIdParm
-        step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret
+//        step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret
+        step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: '${env.PASSWORD}'
     }
     
     echo "Sonatype: finished"
