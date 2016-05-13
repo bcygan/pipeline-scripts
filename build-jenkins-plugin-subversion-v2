@@ -121,7 +121,24 @@ def runSonatypeCLM (String stageIdParm) {
         def secret = hudson.util.Secret.fromString(env.PASSWORD);
 //        step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret, applicationTypePost: 'listAppId', listAppId:'Jenkins', stageId:stageIdParm
 //        step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret
-        step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret, applicationSelectTypePost: 0, listAppId: 0, stageId: stageIdParm
+//        step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret, applicationSelectTypePost: 0, listAppId: 0, stageId: stageIdParm
+
+// documented interface from Sonatype
+//public PostBuildScan(final String username,
+//                       final Secret password,
+//                       final ApplicationSelectType applicationSelectTypePost,
+//                       final String listAppId,
+//                       final String manualAppId,
+//                       final String scanTargets,
+//                       final String moduleExcludes,
+//                       final String scanProperties,
+//                       final boolean failOnClmServerFailures,
+//                       final String stageId)
+        step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret, 
+            applicationSelectTypePost: new ApplicationSelectType('listAppId'),
+            listAppId: 'Jenkins',
+            failOnClmServerFailures: true,
+            stageId: stageIdParm
     }
     
     echo "Sonatype: finished"
