@@ -1,16 +1,16 @@
 // changes from v2: using one node to fetch the sources and a different node to build. Quite useful for embedded scenarios or variant testing. 
 
-def stashName = "apache-httpd-sources"
+def sourcesStashName = "apache-httpd-sources"
   
 stage "Fetch Sources"
   node('jdk8') { // this really could be any node with a connection to the outside world
     fetchSources()
-    stash stashName, includes: "*" 
+    stash sourcesStashName 
   }
 
 node('apache') { // this node doesn't need an outside connection
   stage "Build Configuration"
-  unstash stashName // retrieving the stuff we fecthed earlier
+  unstash sourcesStashName // retrieving the stuff we fetched earlier
   configureBuild()
 
   stage "Make"
