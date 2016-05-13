@@ -104,7 +104,7 @@ def guardedCheckpoint ( String message ) {
 }
 
 def runSonatypeCLM (String stageIdParm) {
-    echo "++++++++++ Sonatype stage ${stageIdParm} ++++++++++"
+    echo "++++++++++ Sonatype CLM stage ${stageIdParm} ++++++++++"
     // TODO 
     // unstash either binary or -sources
     // let Sonatype scan, fetch the result
@@ -119,8 +119,8 @@ def runSonatypeCLM (String stageIdParm) {
     //step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: 'jenkins', password: 'jenkins', applicationTypePost: 'listAppId', listAppId:'Jenkins', stageId:stageIdParm
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: '452cfc80-f164-43d9-93e7-4dd1360dca47', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME']]) {
     def secret = hudson.util.Secret.fromString(env.PASSWORD);
-println(secret.getEncryptedValue())
-println(secret.getPlainText())
+//println(secret.getEncryptedValue())
+//println(secret.getPlainText())
         step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret, applicationTypePost: 'listAppId', listAppId:'Jenkins', stageId:stageIdParm
     }
     
