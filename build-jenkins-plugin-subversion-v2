@@ -134,7 +134,8 @@ def runSonatypeCLM (String stageIdParm) {
 //                       final String scanProperties,
 //                       final boolean failOnClmServerFailures,
 //                       final String stageId)
-        def typePost = com.sonatype.insight.ci.hudson.ApplicationSelectType('Jenkins',null,null)
+        def typePost = com.sonatype.insight.ci.hudson.ApplicationSelectType('Jenkins',null,null);
+        
         step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret, 
             applicationSelectTypePost: typePost,
             listAppId: 'Jenkins',
