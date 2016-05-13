@@ -3,7 +3,7 @@
 def stashName = "apache-httpd-sources"
   
 stage "Fetch Sources"
-  node('jdk7') { // this really could be any node with a connection to the outside world
+  node('jdk8') { // this really could be any node with a connection to the outside world
     fetchSources()
     stash stashName, includes: "*" 
   }
