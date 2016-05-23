@@ -140,7 +140,11 @@ def runSonatypeCLM (String stageIdParm) {
         
         step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret, 
             applicationSelectTypePost: typePost,
-            listAppId: 'Jenkins',
+            listAppId: null,
+            manualAppID: 'Jenkins',
+            scanTargets: '',
+            moduleExcludes: '',
+            scanProperties: '',
             failOnClmServerFailures: true,
             stageId: stageIdParm
     }
