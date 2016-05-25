@@ -15,7 +15,7 @@ node {
     echo "++++++++++ Build - running maven +++++"
     runMaven("-DskipTests=true clean install") // we will come back to the tests later on 
     
-    runSonatypeCLM('Build')
+    runSonatypeCLM('build')
     
     echo "++++++++++ Build - stashing plugin file +++++"
     // recursively stash all .hpi files under target/, namely archiving /*/target/*.hpi
@@ -63,7 +63,7 @@ parallel "Load Test #1" : {
 
 stage name:"Pre-Release Tests"
     node {
-        runSonatypeCLM('Stage Release')            
+        runSonatypeCLM('stage-release')            
     }
 
 stage name:"Deploy to Production"
