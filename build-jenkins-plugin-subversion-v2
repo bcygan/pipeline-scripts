@@ -140,7 +140,7 @@ def runSonatypeCLM (String stageIdParm) {
         def com.sonatype.insight.ci.hudson.ApplicationSelectType typePost = com.sonatype.insight.ci.hudson.ApplicationSelectType.backfillApplicationSelectType(basicTypePost,null,"Jenkins");
         echo  "got typePost 2"
         
-        step $class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret, 
+        step [$class: 'com.sonatype.insight.ci.hudson.PostBuildScan', username: '${env.USERNAME}', password: secret, 
             applicationSelectTypePost: typePost,
             listAppId: 'Jenkins',
             manualAppID: 'Jenkins',
@@ -148,7 +148,7 @@ def runSonatypeCLM (String stageIdParm) {
             moduleExcludes: '',
             scanProperties: '',
             failOnClmServerFailures: true,
-            stageId: stageIdParm
+            stageId: stageIdParm]
     }
     
     echo "Sonatype: finished"
